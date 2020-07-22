@@ -1,0 +1,231 @@
+
+! 5/24/2013 - ksa
+!   Simple setup for Steve Ivancic's channeling experiment on EP
+!   2 heater beams at 23-degree with spot size 800-um (diameter)
+!   spot shape unknown, but assumed for now supergaussian order 2.5
+!   Target is CH planar foil, very thick, assuming 200-um for now
+!   Need to verify CH density with Steve
+
+&optsins
+ short_prt_step=50
+ do_interface = .false.
+ do_rezgrid = .false.
+ do_thermtran = .true.
+ do_laserdep = .true.
+ do_radtran = .true.
+ do_cptransport = .false.
+ do_ppm_hydro   = .true.
+ do_faste_tran  = .true.
+ stitle='Steve_channeling_test_no_short_pulse_laser_fixes'
+ directory_material_lib = './'
+ material_lib_file = 'material_lib_v7_46.txt'
+&end
+
+&stepins
+ ntsmax = 9999999
+ dtminim = 1.0e-16
+ dtstart = 1.0e-15
+ dtmaxim = 1.0e-12
+ stimemx = 4.51e-09
+ fctmtmp = 1.e8
+ fctmcfl = 0.40     ! 0.4 
+&end
+
+&plotins
+ plt_time_dt = 250.0e-12
+ plt_laser = .true.
+ plt_elndens = .true.
+ plt_avgz2 = .true.
+ plt_vof     = .true.
+&end
+
+&lagrins
+ hbcis='fixed'
+ crotqcn =0.5
+&end
+
+&eulins
+ total_energy            = .true.
+ first_order_hydro       = .false.
+ visc_art                = 1.0d0
+ grid_motion_type        = 'static' !'lagran_suxing' !'moving' !'static'  !'moving'
+ time_change_grid_motion = 100.0d-9
+ eulerian_verbose        = .true.
+&end
+
+&ttrains
+ solver_option_tt           = 'kry_bj_ilu_mpi'
+ fluxlme                    = -0.06
+ laser_dep_method           = 'mazinisin' ! 'lasermc' 'straight_line'
+&end
+ 
+&fusionins
+ cp_schema = 'alphamc'
+ plt_fusion_dt = 99999.0E-9
+ alpha_density_floor = 0.0 ! 5/27/05 Suppresses erroneous messages; AMC doesn't use alpha densities.
+ nfine_cells = 1400 ! 1/5/07
+&end
+
+&radtins
+ solver_option_rt = 'inteldss' ! 5/26/05 'petscd'
+ number_of_radiation_freq_groups = 48 ! 48 ! 16  !16   !12  !48
+ radiation_schema = 'kershaw'
+ nrtstep = 15 ! 1/10/07
+ opgrp='_50x50Dt'
+! opgrp='standard'
+&end
+
+
+&laserins
+ directory_pulse_file='./'
+ pulse_file='Pshape_EP4Beams.dat'
+ pulse_file_format='column'
+ langdon = .false.
+ initial_laser_uniformity='smooth' 
+ laser_smoothing='none'
+ orchid_style_interp      = .false.
+ cold_start = .false. !.true.  !.false.
+ rtarget0 = 2.930043911069815e5  !0.977847970356605e5  !10000.0  !430.0  !This is the planar target surface position in microns
+ !!!rtarget0 = 4.8892398517830244e4
+ !!!rtarget0 = 0.977847970356605e4  !10000.0  !430.0  !This is the planar target surface position in microns
+ !!!rtarget0 = 50000.0   !in um 
+&end
+
+
+&optsins
+do_schurtz=.true.
+&end
+
+
+&schurtzins
+ schurtz_solver_type='inteldss'
+ schurtz_bcis = "zero"
+ schurtz_bcie = "zero"
+ schurtz_bcjs = "zero"
+ schurtz_bcje = "zero"
+ schurtz_ngroups = 48
+ schurtz_hotfrac = 0.75
+ schurtz_starttime = 0.1E-9
+&end 
+
+&mazinisins
+                                                                                                 
+!  per John, to reduce noise in the ultra-low-density corona, start ray trace earlier at lower density
+  minCrit = 0.001   ! 11/4/04 Minimum critical density multiplier before starting full 3-D raytrace; 0.01 [default].
+                                                                                                
+  target_offset3D(1) = 0.0
+  target_offset3D(2) = 0.0
+  target_offset3D(3) = 2.930043911069815e1  !0.977847970356605e1  !-0.5  !50.0 ! -1.0    !target offset along +z-axis by 50-cm
+                                                                                                 
+  mazinisin_enable = .true.
+  mazinisin_dir = './'
+                                                                                                 
+  maz_DiagSuite_enable = .true.  ! Turn on Mazinisin Diagnostic suite.
+  maz_Ediag_dt = 20.0e-12, maz_RayDiag_dt = 20.0e-12, maz_Diag_dt = 20.0e-12 ! Delta time to print diagnostics [s]; if dt=0 then info. every time step.
+  maz_sectEdiag_enable  = .true. ! Write out absorption fraction data for certain sectors.
+  maz_sectEdiag2_enable = .true. ! Write out spatial absorption fraction data for certain sectors.
+  maz_sectEdiag3_enable = .true. ! Write out absorption fraction data for all sectors.
+  maz_sectEdiag4_enable = .true. ! Write out absorption fraction data for all sectors.
+  verbose_ray = .false., mazDebugging = .false.
+                                                                                                
+  !
+  ! RayTrace section:
+  !
+  maz_raytrace_enable = .true.  ! enables mazinisin raytracing.
+  PropagationMode2D = 'MODE2D' ! 2-D RayTrace propagation mode; 'MODE2D' [default], 'MODE1Din2D'.  
+  RT_jBC = 'RT_TRANSMISSIVE' ! RT_REFLECTIVE, RT_TRANSMISSIVE
+  beam_port_config_dsn = 'BeamPortConfig_EP_4beams.dat' ! Dataset name of the user supplied beam-port configuration
+  maz_energy_floor = 1.0e-15    ! energy floor used to terminate rays [ergs]
+  ColdStart_enable = .false.
+  mazRT_TimeSkip_enable = .false. !.true.   ! 1/26/07 Time skip, 1.0 ps.
+  array_imin = 1  !50 ! Sets minimum i-index allocation; Import
+
+  !
+  ! Far-field spot shape control
+  !
+  !  FFSPOTDEF_PORTFILE --- This option uses the shapes specified in the beam_port_config_dsn_file. [default]
+  !
+  !  FFSPOTDEF_USERFILE --- THis option over-rides the spot shapes specified in the beam_port_config_dsn file.
+  !
+  !   FFspot_DefType = 'FFSPOTDEF_USERFILE'
+  !   FFspot_dsn(1) = 'FFspot_23p5deg_def_0cm.dat'   ! 23.5 deg
+  !   FFspot_dsn(2) = 'FFspot_30deg_def_0cm.dat' ! rp: 35
+  !   FFspot_dsn(3) = 'FFspot_44p5deg_def_0cm.dat' ! rp: 46
+  !   FFspot_dsn(4) = 'FFspot_50deg_def_0cm.dat' ! rp: 69
+
+   FFspot_RayDistType = 'RAYDISTTYPE_INVPROJ3'  ! Inverce projection method
+!   InvProj_SearchType = 'INVPROJ_ADAPTIVE' ! 3/11/08 'INVPROJ_SURROGATESPH' [default], 'INVPROJ_ADAPTIVE'
+
+! per John, to fix the clipping, set the enclosed energy fraction for the FF spot field array to be closer to 1 to avoid clipping at the edges of the beam.
+!    increased nFFspotspoints to avoid losing resolution in the beam
+   minEnclEnergyFrac = 0.99   ! 5/17/05 Minimum enclosed energy fraction; 0.0 < value < 1.0; 0.99 [default]. 
+   nFFspotpoints =     600  !200 !400   ! The number of points in x and y dimensions to describe the far-field spot shape: 200[default].
+   FFspot_nCntPerSector(1) = 10
+   FFspot_nCntPerSector(2) = 10
+   FFspot_nCntPerSector(3) = 10
+   FFspot_nCntPerSector(4) = 10
+   FFspot_Nrays1 =        7 !  400 !1  !10000     ! Number of rays in first contour; used in full 3-D raytrace; 4 [default].
+   
+   invokeBeamSymmetry = .false. ! 12/6/04
+   mazBeamSymmetryType = 'BEAMSYM_AZM'
+   mazOrderedRings = .false.
+   allowNonUniformPolarGrid = .true.
+   
+   maz_OptEmod_enable = .false. ! Enables the calculation of the ring energy optimization and angular spectrum of rays.
+   Ring_Emod_dsn = 'Emod_EP.dat' ! Dataset name of the user supplied relative Ring energies file
+
+   SmoothDepEnable = .false. !, SmoothDepType = SMOOTHDEPTYPE_FFT, nSmoothDep = 9999   ! 8/23/05 number of angular zones is 290.
+   RT_method = 'RT_RKADAPTQUAD' ! 'RT_RK1STORDER', 'RT_RKADAPTQUAD', 'RT_BSADAPTQUAD'
+   AbsInt_method = 'ABSINT_RKADAPTQUAD' ! 2/17/05 Absorption integration method; ABSINT_TRAPEZOIDAL [default], ABSINT_SIMPSON.  
+   RTcurveComp = 0.02 ! 7/14/04 Raytrace step size compression factor; 0.015 [default].
+
+   cell_edge_interptype = 'LINEAR' ! 'LINEAR','INVERSE_RSQ','EXPONENTIAL' [default]
+   neratio_interp_type  = 'ISOPARAMETRIC' ! 'ISOPARAMETRIC','BICUBICINTERP','INVERSE_RSQ','EXPONENTIAL','INVRSQ_REGION','EXP_REGION'
+   AbsCoeff_interp_type = 'ISOPARAMETRIC' ! 'ISOPARAMETRIC','BICUBICINTERP','INVERSE_RSQ','EXPONENTIAL','INVRSQ_REGION','EXP_REGION'
+   mazRT_OuterEdgeBCfactor_neratio = 0.1 
+   mazRT_OuterEdgeBCfactor_AbsCoeff = 0.01
+                                                                                                
+   maz_LaserImbalance_enable       = .false. ! Master control switch.
+   maz_PowerImbalance_enable       = .false., PowerImbalanceRMS = 0.10 ! Power Imbalance.
+   maz_MisTimingImbalance_enable   = .false., MisTimingImbalanceRMS = 9.0 ! MisTiming.
+   maz_MisPointingImbalance_enable = .false., MisPointingImbalanceRMS = 10.0 ! MisPointing.  mazRT_OuterEdgeBCfactor_AbsCoeff = 0.01
+
+   maz_NonZeroMmodes_enable = .false.  !.true. ! ; Master control switch .true. or .false.[default].
+   maz_NonZeroMmodes_dt = 2.e-12 ! Temporal delta to recalculate the non-zero m-mode modal powers; [s].
+   NonZeroMmodes_lmode_start = 1, NonZeroMmodes_lmode_stop = 50, NonZeroMmodes_lmode_skip = 1,
+   ASR_Lmodecutoff = 180  ! The L-mode cutoff for build of the surrogate sphere; 100[default].
+
+&end
+
+&fasteins
+ do_TPD_calculation_ONLY = .true.
+&end
+
+&restartins
+ 
+ !ckpnttimes_dt(1) = 200.0e-12, ckpnttimes_dt(2) = 2.e-9
+ max_ckpnt_files = 2
+ ckpnt_time_dt=50.d-12
+ !max_ckpnt_files   = 1
+ 
+ restart_file_name = 'last'
+ 
+!  restart_file_name = 'ckpnt_s3_0_4609.ckp'
+ 
+&end
+
+
+&resetins
+reset_at_time(1) = 20.0e-120
+ new_mazRT_TimeSkip_enable(1) = .true.
+
+reset_at_time(2) = 100.0e-120 ! 200.0e-12       ! 12/7/06 Turning off RKadapt.
+  new_RT_method(2) = 'RT_RK1STORDER' ! 'RT_RK1STORDER', 'RT_RKADAPTQUAD', 'RT_BSADAPTQUAD'
+  new_AbsInt_method(2) = 'ABSINT_SIMPSON' ! 'ABSINT_SIMPSON', 'ABSINT_RKADAPTQUAD', 'ABSINT_BSADAPTQUAD'
+  new_RTcurveComp(2) = 0.01
+  ! 12/6/06 Increase rays after adaptive RK period.  Stop after 1ns; when it's assumed short wavelngth imprint stops.
+! new_FFspot_Nrays1(2) = 100   
+
+&end 
+
+
