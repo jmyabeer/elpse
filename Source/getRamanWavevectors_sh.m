@@ -1,19 +1,19 @@
 function [srsBundle,epwBundle] = getRamanWavevectors_sh(traj,omega_ps, ...
-                                                          rayGd, angle, ...
-                                                          itmax,landauC)    
-% GETRAMANWAVEVECTORS - documentation to do
+                                                       rayGd, angle, ...
+                                                       itmax, ...
+                                                       landauC,inboundOnly)    
+% function [srsBundle,epwBundle] =
+% getRamanWavectors_sh(traj,omega_ps,rayGd,angle,itmax,landauC,inboundOnly)
 %
-%     traj - the trajectory of a single EM ray
-%   
-%   probably need to know the incident EM wave frequency - that is
-%   all since everything else will be in traj
-    
-% Let's assume that we have a list of points where each row is:
-%   traj = time z r kz kr, where each is a column vector
-%     i.e., the contents of a ray bundle cell for an EM wave whose
-%     trajectory has been integrated
-%   omega - frequency of EM wave in rads/ps
-%      at some point I might add omea to the rayBundle
+%         traj - the trajectory of a single EM ray
+%                = time z r kz kr, where each is a column vector
+%     omega_ps - the (scalar) frequency of the ray trajectory (rads/ps)
+%        rayGd - output struct from reading hydrodynamics
+%        angle - angle of SRS to be made in degrees
+%        itmax - unused here?
+%      landauC - value to use for the Landau cutoff - e.g. 0.3
+%  inboundOnly - do not make Raman after the ray has encountered nc/4  
+
 
     global cnst   
     cumps = (cnst.c)*1.e-6;       % in um/ps
@@ -42,6 +42,11 @@ function [srsBundle,epwBundle] = getRamanWavevectors_sh(traj,omega_ps, ...
     if ~exist('landauC','var')
         landauC = 0.3;   % maximum allowable k*lambdaDebye 
     end    
+
+    % default inboundOnly is true (no SRS after nc/4 is reached)
+    if ~exist('inboundOnly','var')
+        inboundOnly = true;  
+    end    
     
     % For each point on ray we want a density and temperature    
     neList = interpOnTraj('valsNe',traj,rayGd);
@@ -69,6 +74,20 @@ function [srsBundle,epwBundle] = getRamanWavevectors_sh(traj,omega_ps, ...
     lamDeb2 = (cnst.lamDebye)^2*teList./ne;    % cm^2
     lamDebum2 = 1.e8*lamDeb2;                  % um^2
     
+    %
+    % We might want to exclude Raman on the outbound trajectory,
+    % i.e. it is considered to be outbound if the ray has already
+    % encountered quarter critical density
+
+    % let's see if this is the case
+    %
+    outBound = find(neTonc >= 0.25); % indices for outbound points
+
+    if isempty(outBound)
+        lastInboundIdx = numel(neTonc);
+    else
+        lastInboundIdx = outBound(1);
+    end
     
     % only want a Raman event if the solution for k is real - we
     % can remove those with imaginary parts when we are
@@ -96,11 +115,22 @@ function [srsBundle,epwBundle] = getRamanWavevectors_sh(traj,omega_ps, ...
     
     % can't have Raman just anywhere ...
     %
-    % - This test isn't good enough. We should test on
+    % - This test wasn't good enough. We should test on
     %   kSRSMag instead of k (JFM)
     %
-    goodidxs = find((imag(kSRSMag)==0) & (abs(k2lam2) <= landauC^2));
     
+    isRealK = imag(kSRSMag) == 0;               % logical vectors
+    isBelowLandau = abs(k2lam2) <= landauC^2;
+    isInbound = (1:numel(k))' <= lastInboundIdx;   % think how to do this
+
+    if inboundOnly
+        goodidxs = find(isRealK & isBelowLandau & isInbound);
+    else
+        goodidxs = find(isRealK & isBelowLandau);
+    end    
+    
+    % Get the times
+    %
     if exist('tt','var')
         ttgood = tt(goodidxs);
     else
@@ -114,8 +144,7 @@ function [srsBundle,epwBundle] = getRamanWavevectors_sh(traj,omega_ps, ...
     freqSRS2 = (omega_ps.*wpeTow0).^2 + cumps^2*kSRS.^2;  % ps^-2
     freqSRS = sqrt(freqSRS2);                             % ps^-1
     vacWavlSRS = cnst.twopi*cumps./freqSRS;  % microns
-    
-    
+        
     %
     % Langmuir wave first
     %
