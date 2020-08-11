@@ -107,7 +107,8 @@ function [srsBundle,epwBundle] = getRamanWavevectors_sh(traj,omega_ps, ...
         kSRSHat(i,2) = columnVec(2);
     end
     
-    kSRSMag = k0.*sqrt(1-2.*sqrt(neTonc));                 
+%    kSRSMag = k0.*sqrt(1-2.*sqrt(neTonc)); % error! should be vaccum k0                 
+    kSRSMag = kvac.*sqrt(1-2.*sqrt(neTonc)); % error! should be vaccum k0                 
     kSRS = kSRSMag.*kSRSHat;
     kLangmuir = kvecs-kSRS;
     k = sqrt(kLangmuir(:,1).^2 + kLangmuir(:,2).^2);
@@ -141,7 +142,7 @@ function [srsBundle,epwBundle] = getRamanWavevectors_sh(traj,omega_ps, ...
     %    good indices
     freqEPW = omega_ps.*wpeTow0.*sqrt(1+3*k2lam2);        % ps^-1
     %freqEPW = omega_ps.*wpeTow0.*(1+3/2*k2lam2);        % ps^-1    
-    freqSRS2 = (omega_ps.*wpeTow0).^2 + cumps^2*kSRS.^2;  % ps^-2
+    freqSRS2 = (omega_ps.*wpeTow0).^2 + cumps^2*kSRSMag.^2;  % ps^-2
     freqSRS = sqrt(freqSRS2);                             % ps^-1
     vacWavlSRS = cnst.twopi*cumps./freqSRS;  % microns
         
