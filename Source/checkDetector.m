@@ -21,7 +21,7 @@ function DetectorFreq = checkDetector(rayBundle,Detector)
     for i=1:rayBundle.nrays
         % atan(kr/kz)
         %
-        angle = atan2d(rayBundle.trajs{1,i}(end,5)/rayBundle.trajs{1,i}(end,4));
+        angle = atan2d(rayBundle.trajs{1,i}(end,5),rayBundle.trajs{1,i}(end,4));
         if angle >= (Detector.angPos(1)-Detector.angAccept)...
                 && angle <= (Detector.angPos(1)+Detector.angAccept)
             hitIndxs = [hitIndxs,i]; % Appends next hit ray index to hitIndxs
