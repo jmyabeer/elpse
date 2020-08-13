@@ -1,4 +1,5 @@
 ./Quarantine
+./Quarantine/*
 *.m~
 *.md~
 *.mat
