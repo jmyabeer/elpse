@@ -8,6 +8,9 @@ function DetectorFreq = checkDetector(rayBundle,Detector)
 % JFM comments (14/JUL/2020)
 %   describe what DetectorFreq is (i.e. a row vector of frequencies
 %   that correspond to the rays hitting the detector
+   
+    % Initializes hitIndxs row vector
+    hitIndxs = [];     
     
     % Loop over rays in the rayBundle and collect the indices of
     % the rays in the rayBundle that hit the detector, storing them
@@ -17,18 +20,11 @@ function DetectorFreq = checkDetector(rayBundle,Detector)
     %    
     for i=1:rayBundle.nrays
         % atan(kr/kz)
-        %   JFM - do we need atan2d here? i.e., 4 quadrant inverse?
         %
-        angle = atand(rayBundle.trajs{1,i}(end,5)/rayBundle.trajs{1,i}(end,4));
+        angle = atan2d(rayBundle.trajs{1,i}(end,5)/rayBundle.trajs{1,i}(end,4));
         if angle >= (Detector.angPos(1)-Detector.angAccept)...
                 && angle <= (Detector.angPos(1)+Detector.angAccept)
-            if ~exist('hitIndxs','var')
-                % Initializes hitIndxs row vector with first ray index that
-                % hits the detector
-                hitIndxs = i;               
-            else
-                hitIndxs = [hitIndxs,i]; % Appends next hit ray index to hitIndxs
-            end
+            hitIndxs = [hitIndxs,i]; % Appends next hit ray index to hitIndxs
         end
     end
     
@@ -38,7 +34,7 @@ function DetectorFreq = checkDetector(rayBundle,Detector)
     % JFM - find the freqencies of the rays indexed by "hitIndxs"
     %  and store them in the row vector "DetectorFreq"
     %
-    if exist('hitIndxs','var')
+    if ~isempty(hitIndxs)
         DetectorFreq = rayBundle.frequency(hitIndxs);
     else
         DetectorFreq = [];

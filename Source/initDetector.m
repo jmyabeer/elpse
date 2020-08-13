@@ -19,9 +19,9 @@ function detector = initDetector(name,angPos,angAccept)
 %                                    %  (reference by source)
 %       'filter', []);               %  detection efficiency v. freq.
 %       
-%      detector.source{1,1} = 0.0;       % time in ns of hydro slice
-%      detector.source{1,2} = "bundle";  % index of sourceBeams array
-%      detector.source{1,3} = 180;       % SRS angle in degrees
+%      detector.source[1,1] = 0.0;       % time in ns of hydro slice
+%      detector.source[1,2] = 1;         % index of sourceBeams array
+%      detector.source[1,3] = 180;       % SRS angle in degrees
     
     detector = struct(...         
      'name', "default", ...       %  e.g. "FABS 32B" 
@@ -32,10 +32,11 @@ function detector = initDetector(name,angPos,angAccept)
      'frequencies',[], ...        %  store frequencies here
      'histogram',[], ...          %  store histogram here
      'filter', []);               %  detection efficiency v. freq.
-
-    detector.sourceParams{1,1} = 0.0;       % time in ns of hydro slice
-    detector.sourceParams{1,2} = 1;         % index of sourceBeams array
-    detector.sourceParams{1,3} = 180;       % SRS angle in degrees     
+ 
+% Example of sourceParams
+%     detector.sourceParams[1,1] = 0.0;       % time in ns of hydro slice
+%     detector.sourceParams[1,2] = 1;         % index of sourceBeams array
+%     detector.sourceParams[1,3] = 180;       % SRS angle in degrees     
     
     % Update name from arg
     if exist('name','var')
@@ -49,7 +50,7 @@ function detector = initDetector(name,angPos,angAccept)
     
     % Update angular acceptance from arg
     if exist('angAccept','var')
-        detector.angAccept = angPos;
+        detector.angAccept = angAccept;
     end
     
 end
