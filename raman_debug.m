@@ -36,6 +36,8 @@
  addVarFlag.dLnTedr = true;
  addVarFlag.Vz = true;
  addVarFlag.Vr = true;
+ addVarFlag.Zbar = true;
+ addVarFlag.Zsqr = true;
  
  % TO DO: add a function called "importAnalyticGrid()" that allows
  % you to define analytic hydro profiles, e.g. linearly varying
