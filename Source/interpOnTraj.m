@@ -1,6 +1,6 @@
  function varOnTraj = interpOnTraj(varToGet,y,rayGd,ncForRay)
  % Interpolates hydro variables onto a ray segment
- %   interpOnTraj(varToGet,y,rayGd)
+ %   interpOnTraj(varToGet,y,rayGd,ncForRay)
  %             y  -   either cols constaing t z r kz kr
  %                    or cols containing just z r kz kr 
  %      varToGet  -  'valsNe', 'valsDLogNedz', 'valsDLogNedr'

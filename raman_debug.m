@@ -256,4 +256,4 @@
  pltIncl = clearPlotList;
  pltIncl.quiverVel = true;
  makePlotList(pltIncl,rayGd);
- 
+
