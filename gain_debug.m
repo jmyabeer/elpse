@@ -234,11 +234,13 @@
  
  % density dependent part (alpha)
  %
- alphaFac = 1./(1.-sqrt(neTonC));  % see Rosenbluth formula in Docs
-                                   % NEED TO FIX THE ERROR!
+ alphaFac1 = 1./(1.-sqrt(neTonC));  % see Rosenbluth formula in
+                                    % Docs
+ alphaFac2 = 1./sqrt(1-neTonC);
+ alphaFac = alphaFac1.*alphaFac2;
  
  otherFactors = alphaFac;          % need to add the things that
-                                   % depend on k and its direction
+                                   % depend on k and theta/phi
  
  RosGain = (cnst.pi/4.0).*Lnorm.*(voscToc2').*otherFactors;
  
