@@ -23,7 +23,15 @@ function cnst = initCnst()
                             % in eV
     cnst.wpe         = 5.64e4;   % wpe = 5.64e4*sqrt(ne) in rad/s
     cnst.lamDebye    = 7.43e2;   % lamDebye = 7.43e2*sqrt(Te/ne) in
-                                 % cm
+
+    % various laser plasma
+    cnst.vosc = 8.095e8;    % multiply by sqrt(I_15) and lambda_0
+                            % to get vosc in cm/sec. The laser
+                            % vacuum wavelength is in um
+    
+    % 
+    cnst.voscToC = 8.095e6/cnst.c; % multiply by sqrt(I_15) and
+                                   % lambda_0 in um                              
     
     % default laser params
     cnst.lambda0 = 0.351e-6; % m

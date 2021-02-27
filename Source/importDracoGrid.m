@@ -34,6 +34,8 @@
      addVarFlag.ti = true;
      addVarFlag.Vz = false;
      addVarFlag.Vr = false;
+     addVarFlag.Zbar = true;
+     addVarFlag.Zsqr = true;
  end
  
  
@@ -58,6 +60,10 @@
  % velocity
  vzAll = T.Vz;
  vrAll = T.Vr;
+ 
+ % average ionization <Z> and average square <Z^2>
+ ZbarAll = T.Z;
+ ZsqrAll = T.Zsq;
  
  
  % ------------ our time slice (check that it's legit)
@@ -275,6 +281,28 @@
                        roff);
      rayGd.vrblock = vrblock;
      rayGd.valsVr = reshape(vrblock,[numel(zSblock),1]); 
+ end
+ 
+ % Zbar: average (over species) ionization state <Z>
+ if addVarFlag.Zbar
+     ZbarSleft = fliplr(ZbarAll{iTime});
+     ZbarSright = ZbarAll{iTime};
+     ZbarSfull = [ZbarSleft,ZbarSright]; 
+     Zbarblock = ZbarSfull(zstr:strdZ:zstp,rstr+roff:strdR:2*rstp- ...
+                       roff);
+     rayGd.Zbarblock = Zbarblock;
+     rayGd.valsZbar = reshape(Zbarblock,[numel(zSblock),1]); 
+ end
+ 
+ % Zsqr: average (over species) ionization state <Z^2>
+ if addVarFlag.Zsqr
+     ZsqrSleft = fliplr(ZsqrAll{iTime});
+     ZsqrSright = ZsqrAll{iTime};
+     ZsqrSfull = [ZsqrSleft,ZsqrSright]; 
+     Zsqrblock = ZsqrSfull(zstr:strdZ:zstp,rstr+roff:strdR:2*rstp- ...
+                       roff);
+     rayGd.Zsqrblock = Zsqrblock;
+     rayGd.valsZsqr = reshape(Zsqrblock,[numel(zSblock),1]); 
  end
  
    

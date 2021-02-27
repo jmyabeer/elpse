@@ -1,7 +1,10 @@
  % 
- % Debugging the Raman routines
- %
- %   Edited: JFM 15/JUL/2020
+ % Debugging the Raman routines continued...
+ %   Looks at a single ray from an incident bundle and
+ %   makes Raman from it
+ %       - use to test getRamanWavevectors_sh and the push
+ %         of the generated SRS and Langmuir waves
+ %   Edited: JFM 24/JUL/2020
  
  
  path(path,'./Plotting')
@@ -36,8 +39,6 @@
  addVarFlag.dLnTedr = true;
  addVarFlag.Vz = true;
  addVarFlag.Vr = true;
- addVarFlag.Zbar = true;
- addVarFlag.Zsqr = true;
  
  % TO DO: add a function called "importAnalyticGrid()" that allows
  % you to define analytic hydro profiles, e.g. linearly varying
@@ -198,8 +199,8 @@
  %
  rSkip = 4;
  
- for chosenRay = 1:rSkip:rayBundleB1.nrays   
-     % for chosenRay = 17:17
+ for chosenRay = 10:10 % 1:rSkip:rayBundleB1.nrays   
+
      traj = rayBundleB1.trajs{chosenRay};
      freq = 1.e-12*rayBundleB1.frequency(chosenRay);  % ps^-1
      
@@ -256,4 +257,4 @@
  pltIncl = clearPlotList;
  pltIncl.quiverVel = true;
  makePlotList(pltIncl,rayGd);
-
+ 
