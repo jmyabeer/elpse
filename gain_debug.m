@@ -236,7 +236,7 @@
  %
  alphaFac1 = 1./(1.-sqrt(neTonC));  % see Rosenbluth formula in
                                     % Docs
- alphaFac2 = 1./sqrt(1-neTonC);
+ alphaFac2 = 1./sqrt(1-neTonC);   % ERROR!!!
  alphaFac = alphaFac1.*alphaFac2;
  
  otherFactors = alphaFac;          % need to add the things that
